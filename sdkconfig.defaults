@@ -1,0 +1,10 @@
+# ESP-IDF build configuration (Kconfig). Read by esp-idf-sys at build time.
+# Only values that differ from ESP-IDF defaults go here.
+
+# Tab5 has an ESP32-P4 rev v1.0. Since IDF 5.5 the default image requires rev >= v3.1
+# and will refuse to boot on v1.0.
+CONFIG_ESP32P4_SELECTS_REV_LESS_V3=y
+CONFIG_ESP32P4_REV_MIN_100=y
+
+# Rust std code needs more stack than the 3.5 KB default of the main task.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=16384

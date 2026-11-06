@@ -1,0 +1,4 @@
+[toolchain]
+# riscv32imafc-esp-espidf is a tier-3 target: needs nightly + build-std (rust-src).
+channel = "nightly"
+components = ["rust-src"]
