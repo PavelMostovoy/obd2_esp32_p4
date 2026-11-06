@@ -1,0 +1,93 @@
+// Touch + display test screen: a number with big - / + buttons (landscape 1280x720).
+
+component RoundButton inherits Rectangle {
+    in property <string> label;
+    callback clicked();
+
+    width: 260px;
+    height: 260px;
+    border-radius: 40px;
+    background: touch.pressed ? #2e7dd7 : #1f4f8a;
+    border-width: 4px;
+    border-color: #6fa8ff;
+
+    Text {
+        text: root.label;
+        font-size: 160px;
+        color: white;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+
+    touch := TouchArea {
+        clicked => { root.clicked(); }
+    }
+}
+
+export component MainWindow inherits Window {
+    in-out property <int> value: 0;
+    // Debug overlay: last raw touch position, in logical (landscape) pixels.
+    in property <bool> touch-down: false;
+    in property <length> touch-x;
+    in property <length> touch-y;
+
+    callback increment();
+    callback decrement();
+
+    width: 1280px;
+    height: 720px;
+    background: #10141c;
+
+    Text {
+        y: 30px;
+        width: parent.width;
+        text: "Touch test";
+        font-size: 40px;
+        color: #8a94a6;
+        horizontal-alignment: center;
+    }
+
+    RoundButton {
+        x: 80px;
+        y: (parent.height - self.height) / 2;
+        label: "−";
+        clicked => { root.decrement(); }
+    }
+
+    Text {
+        x: 380px;
+        width: 520px;
+        y: (parent.height - self.height) / 2;
+        text: root.value;
+        font-size: 220px;
+        color: white;
+        horizontal-alignment: center;
+    }
+
+    RoundButton {
+        x: parent.width - self.width - 80px;
+        y: (parent.height - self.height) / 2;
+        label: "+";
+        clicked => { root.increment(); }
+    }
+
+    Text {
+        y: parent.height - 60px;
+        width: parent.width;
+        text: root.touch-down
+            ? "touch x=\{round(root.touch-x / 1px)} y=\{round(root.touch-y / 1px)}"
+            : "no touch";
+        font-size: 28px;
+        color: #8a94a6;
+        horizontal-alignment: center;
+    }
+
+    if root.touch-down: Rectangle {
+        x: root.touch-x - 20px;
+        y: root.touch-y - 20px;
+        width: 40px;
+        height: 40px;
+        border-radius: 20px;
+        background: #ff5252a0;
+    }
+}

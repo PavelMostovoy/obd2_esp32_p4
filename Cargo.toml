@@ -14,11 +14,21 @@ opt-level = "s"
 
 [profile.dev]
 debug = true
-opt-level = "z" # unoptimized std builds are too large/slow on the MCU
+# Not "z": with opt-level "z" the firmware crashes in Slint text layout (jump to 0x7f7fffff,
+# likely a codegen bug in the esp toolchain). "s" works and matches the release profile.
+opt-level = "s"
 
 [dependencies]
 log = "0.4"
 esp-idf-svc = "0.53"
+# Slint (GPL-3.0 for this project). MCU-style setup: software renderer only, no std backends.
+slint = { version = "1.18", default-features = false, features = [
+    "compat-1-2",
+    "renderer-software",
+    "libm",
+    "unsafe-single-threaded",
+] }
 
 [build-dependencies]
 embuild = "0.33"
+slint-build = "1.18"

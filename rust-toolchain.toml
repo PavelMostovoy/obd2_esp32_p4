@@ -1,4 +1,6 @@
 [toolchain]
-# riscv32imafc-esp-espidf is a tier-3 target: needs nightly + build-std (rust-src).
-channel = "nightly"
-components = ["rust-src"]
+# riscv32imafc-esp-espidf is a tier-3 target: needs a nightly-based toolchain + build-std.
+# Using espup's "esp" toolchain (nightly 2026-07-08, ships rust-src) instead of plain nightly:
+# nightly >= ~2026-10 vendors libc 0.2.190+, whose espidf `stat` uses `st_atim` while
+# std/os/espidf/fs.rs still reads `st_atime` -> std fails to compile (E0609).
+channel = "esp"

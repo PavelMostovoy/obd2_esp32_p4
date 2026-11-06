@@ -6,5 +6,23 @@
 CONFIG_ESP32P4_SELECTS_REV_LESS_V3=y
 CONFIG_ESP32P4_REV_MIN_100=y
 
-# Rust std code needs more stack than the 3.5 KB default of the main task.
-CONFIG_ESP_MAIN_TASK_STACK_SIZE=16384
+# Rust std code + Slint rendering need far more stack than the 3.5 KB default of the main task.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=65536
+# Hardware watchpoint on the end of each task stack: a stack overflow panics right where it happens
+# instead of silently corrupting memory.
+CONFIG_FREERTOS_WATCHPOINT_END_OF_STACK=y
+
+# Flash on the Tab5 is 16 MB.
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+
+# 32 MB octal/hex PSRAM: holds the 720x1280 RGB565 frame buffer (1.8 MB).
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_SPEED_200M=y
+
+# 1 ms tick so short sleeps in the UI loop are accurate.
+CONFIG_FREERTOS_HZ=1000
+
+# We use the new `i2c_master` driver via FFI. esp-idf-hal's `i2c` module still links the legacy driver,
+# whose boot-time check aborts ("CONFLICT! driver_ng is not allowed...") when both are present.
+# Safe as long as the legacy I2C API is never called (never use esp_idf_hal::i2c).
+CONFIG_I2C_SKIP_LEGACY_CONFLICT_CHECK=y
