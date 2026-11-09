@@ -2,6 +2,7 @@
 //! Hardware access goes through `crate::board` only.
 
 use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
@@ -20,6 +21,8 @@ const UI_WIDTH: u32 = PANEL_HEIGHT as u32;
 const UI_HEIGHT: u32 = PANEL_WIDTH as u32;
 const ROTATION: RenderingRotation = RenderingRotation::Rotate90;
 const LOOP_PERIOD: Duration = Duration::from_millis(10);
+/// How often the CAN status line is copied into the UI.
+const STATUS_PERIOD: Duration = Duration::from_millis(250);
 
 struct EspPlatform {
     window: Rc<MinimalSoftwareWindow>,
@@ -48,7 +51,8 @@ fn touch_to_ui(p: TouchPoint) -> LogicalPosition {
     LogicalPosition::new(x, y)
 }
 
-pub fn run(mut board: Board) -> ! {
+/// Runs the UI forever. `can_status` is a one-line text from the CAN task, shown at the bottom.
+pub fn run(mut board: Board, can_status: Arc<Mutex<String>>) -> ! {
     // Two frame buffers alternate, so Slint redraws what changed in either of the last two frames.
     let window = MinimalSoftwareWindow::new(RepaintBufferType::SwappedBuffers);
     window.set_size(PhysicalSize::new(UI_WIDTH, UI_HEIGHT));
@@ -75,9 +79,19 @@ pub fn run(mut board: Board) -> ! {
     // rows redrawn, so they must be written back from the cache too.
     let mut prev_rows: Option<(usize, usize)> = None;
     let mut touch_errors: u32 = 0;
+    let mut last_status_update = Instant::now();
 
     loop {
         slint::platform::update_timers_and_animations();
+
+        if last_status_update.elapsed() >= STATUS_PERIOD {
+            last_status_update = Instant::now();
+            if let Ok(text) = can_status.lock() {
+                if app.get_can_status().as_str() != text.as_str() {
+                    app.set_can_status(text.as_str().into());
+                }
+            }
+        }
 
         match board.touch.poll() {
             Ok(TouchSample::NoNewData) => {}

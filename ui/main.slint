@@ -30,6 +30,7 @@ export component MainWindow inherits Window {
     in property <bool> touch-down: false;
     in property <length> touch-x;
     in property <length> touch-y;
+    in property <string> can-status: "CAN: -";
 
     callback increment();
     callback decrement();
@@ -69,6 +70,15 @@ export component MainWindow inherits Window {
         y: (parent.height - self.height) / 2;
         label: "+";
         clicked => { root.increment(); }
+    }
+
+    Text {
+        y: parent.height - 110px;
+        width: parent.width;
+        text: root.can-status;
+        font-size: 26px;
+        color: #c9a227;
+        horizontal-alignment: center;
     }
 
     Text {
